@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Prompt Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .form-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #ffeb3b;
+        }
+        
+        .form-section h2 {
+            color: #555;
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .form-section h2::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #ffeb3b;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .example {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f7ff;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+            display: none;
+        }
+        
+        #result h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        #promptOutput {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .copy-btn {
+            margin-top: 15px;
+            width: auto;
+            padding: 10px 20px;
+            background: #28a745;
+            font-size: 14px;
+        }
+        
+        .copy-btn:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 LLM Prompt Generator</h1>
+        
+        <form id="promptForm">
+            <!-- Rolle definieren -->
+            <div class="form-section">
+                <h2>Rolle definieren</h2>
+                <label for="role">Mit welchem Verständnis soll das LLM agieren?</label>
+                <input type="text" id="role" name="role" placeholder="z. B. Lehrkraft, Experte, Coach..." required>
+                <div class="example">Beispiel: Lehrkraft für Mathematik</div>
+            </div>
+            
+            <!-- Adressat festlegen -->
+            <div class="form-section">
+                <h2>Adressat festlegen</h2>
+                <label for="audience">Zielgruppe definieren</label>
+                <input type="text" id="audience" name="audience" placeholder="z. B. Schülerinnen und Schüler einer 7. Klasse Gymnasium" required>
+                <div class="example">Beispiel: Schülerinnen und Schüler einer 7. Klasse Gymnasium</div>
+            </div>
+            
+            <!-- Kontext liefern -->
+            <div class="form-section">
+                <h2>Kontext liefern</h2>
+                <label for="context">Situation klar definieren</label>
+                <textarea id="context" name="context" placeholder="z. B. sehr heterogenes Leistungsniveau, spezifisches Thema..." required></textarea>
+                <div class="example">Beispiel: Die Klasse hat ein sehr heterogenes Leistungsniveau im Fach Mathematik</div>
+            </div>
+            
+            <!-- Aufgaben -->
+            <div class="form-section">
+                <h2>Aufgaben</h2>
+                <label for="tasks">Klar und spezifisch formulieren</label>
+                <textarea id="tasks" name="tasks" placeholder="Was soll das LLM genau tun? Komplexe Aufgaben in Einzelschritte aufteilen..." required></textarea>
+                <div class="example">Beispiel: Erstelle 5 Übungsaufgaben zum Thema Bruchrechnung mit unterschiedlichen Schwierigkeitsgraden</div>
+            </div>
+            
+            <!-- Aufgabenformat -->
+            <div class="form-section">
+                <h2>Aufgabenformat</h2>
+                <label for="format">Anforderungen an Handlungsergebnis definieren</label>
+                <input type="text" id="format" name="format" placeholder="z. B. Aufzählung, tabellarische Darstellung, Arbeitsblatt..." required>
+                <div class="example">Beispiel: Tabellarische Darstellung mit Aufgabe, Schwierigkeitsgrad und Lösung</div>
+            </div>
+            
+            <button type="submit">✨ Prompt generieren</button>
+        </form>
+        
+        <div id="result">
+            <h3>📋 Generierter Prompt:</h3>
+            <div id="promptOutput"></div>
+            <button class="copy-btn" onclick="copyPrompt()">📄 Prompt kopieren</button>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('promptForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const role = document.getElementById('role').value;
+            const audience = document.getElementById('audience').value;
+            const context = document.getElementById('context').value;
+            const tasks = document.getElementById('tasks').value;
+            const format = document.getElementById('format').value;
+            
+            const prompt = `Du bist ${role}.
+
+Deine Zielgruppe: ${audience}
+
+Kontext/Situation:
+${context}
+
+Aufgabe:
+${tasks}
+
+Gewünschtes Format:
+${format}
+
+Bitte erstelle basierend auf diesen Vorgaben eine passende Antwort, die auf die Zielgruppe zugeschnitten ist.`;
+            
+            document.getElementById('promptOutput').textContent = prompt;
+            document.getElementById('result').style.display = 'block';
+            
+            // Smooth scroll to result
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+        
+        function copyPrompt() {
+            const promptText = document.getElementById('promptOutput').textContent;
+            navigator.clipboard.writeText(promptText).then(function() {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Kopiert!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
