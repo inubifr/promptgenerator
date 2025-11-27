@@ -18,7 +18,7 @@
             --mid-gray: #888888;
             --light-gray: #f4f4f4;
             --white: #ffffff;
-            --border-radius: 4px; /* Kantiger, moderner */
+            --border-radius: 4px;
         }
 
         * {
@@ -80,6 +80,8 @@
             border-radius: var(--border-radius);
             padding: 40px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            display: flex;
+            flex-direction: column;
         }
 
         h2 {
@@ -163,25 +165,47 @@
             margin-top: 6px;
         }
 
-        .generate-btn {
-            width: 100%;
+        /* Button Group Styles */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .btn {
             padding: 16px;
-            background-color: var(--primary-red);
-            color: white;
-            border: none;
             border-radius: var(--border-radius);
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-top: 10px;
+            text-align: center;
+        }
+
+        .generate-btn {
+            flex: 2;
+            background-color: var(--primary-red);
+            color: white;
+            border: none;
         }
 
         .generate-btn:hover {
             background-color: var(--primary-red-hover);
             transform: translateY(-1px);
+        }
+
+        .clear-btn {
+            flex: 1;
+            background-color: transparent;
+            color: var(--dark-black);
+            border: 1px solid #ddd;
+        }
+
+        .clear-btn:hover {
+            background-color: #f0f0f0;
+            border-color: var(--dark-black);
         }
 
         .output-section {
@@ -197,12 +221,12 @@
             border-left: 4px solid var(--dark-black);
             padding: 25px;
             min-height: 200px;
-            font-family: 'JetBrains Mono', monospace; /* Monospace für Code-Feeling */
+            font-family: 'JetBrains Mono', monospace;
             font-size: 0.9rem;
             line-height: 1.7;
             white-space: pre-wrap;
-            position: relative;
             color: var(--dark-gray);
+            margin-bottom: 15px; /* Platz für den Button darunter */
         }
 
         .prompt-output.empty {
@@ -214,23 +238,32 @@
             border-left-color: #ddd;
         }
 
-        .copy-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            padding: 8px 16px;
+        /* Neuer großer Copy Button */
+        .copy-btn-large {
+            width: 100%;
+            padding: 18px;
             background: var(--dark-black);
             color: white;
             border: none;
             border-radius: var(--border-radius);
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 1rem;
             font-weight: 600;
-            transition: all 0.2s ease;
             text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
-        .copy-btn:hover {
+        .copy-btn-large:hover {
+            background: #333;
+            transform: translateY(-1px);
+        }
+
+        .copy-btn-large.success {
             background: var(--primary-red);
         }
 
@@ -305,11 +338,10 @@
 
         .quality-fill {
             height: 100%;
-            background: var(--dark-black); /* Schwarz statt Bunt */
+            background: var(--dark-black);
             transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
         }
         
-        /* Wenn Qualität hoch ist, wird der Balken rot */
         .quality-fill.high-quality {
             background: var(--primary-red);
         }
@@ -324,6 +356,9 @@
             .card {
                 padding: 25px;
             }
+            .button-group {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -334,7 +369,7 @@
                 <h1>Schul-Prompt Generator</h1>
                 <p>KI-Assistenz für den Bildungskontext</p>
             </div>
-            <div style="font-size: 0.8rem; color: var(--mid-gray); text-transform: uppercase; letter-spacing: 1px;">v2.0 Pro</div>
+            <div style="font-size: 0.8rem; color: var(--mid-gray); text-transform: uppercase; letter-spacing: 1px;">v2.1 Pro</div>
         </div>
 
         <div class="main-grid">
@@ -404,9 +439,14 @@
                     <div class="hint">Sprachstil der Antwort</div>
                 </div>
 
-                <button class="generate-btn" onclick="generatePrompt()">
-                    Prompt generieren
-                </button>
+                <div class="button-group">
+                    <button class="btn generate-btn" onclick="generatePrompt()">
+                        Prompt generieren
+                    </button>
+                    <button class="btn clear-btn" onclick="clearForm()">
+                        Alles zurücksetzen
+                    </button>
+                </div>
 
                 <div class="quality-indicator" id="qualityIndicator" style="display: none;">
                     <span style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Qualität</span>
@@ -422,9 +462,12 @@
                 <div class="prompt-output empty" id="output">
                     // Der generierte Prompt erscheint hier...
                 </div>
-                <button class="copy-btn" id="copyBtn" onclick="copyPrompt()" style="display: none;">
-                    Kopieren
+                
+                <!-- Neuer prominenter Copy Button -->
+                <button class="copy-btn-large" id="copyBtn" onclick="copyPrompt()" style="display: none;">
+                    <span>Prompt Kopieren</span>
                 </button>
+
                 <div class="stats" id="stats" style="display: none;">
                     <div class="stat-item">
                         Zeichen: <strong id="charCount">0</strong>
@@ -511,7 +554,7 @@
             outputDiv.textContent = prompt;
             outputDiv.classList.remove('empty');
 
-            document.getElementById('copyBtn').style.display = 'block';
+            document.getElementById('copyBtn').style.display = 'flex';
             document.getElementById('stats').style.display = 'flex';
 
             const charCount = prompt.length;
@@ -523,6 +566,23 @@
             document.getElementById('tokenCount').textContent = tokenCount;
 
             updateQuality();
+        }
+
+        function clearForm() {
+            document.getElementById('rolle').value = '';
+            document.getElementById('adressat').value = '';
+            document.getElementById('kontext').value = '';
+            document.getElementById('aufgaben').value = '';
+            document.getElementById('format').value = '';
+            document.getElementById('tonalitaet').value = '';
+            
+            const outputDiv = document.getElementById('output');
+            outputDiv.textContent = '// Der generierte Prompt erscheint hier...';
+            outputDiv.classList.add('empty');
+            
+            document.getElementById('copyBtn').style.display = 'none';
+            document.getElementById('stats').style.display = 'none';
+            document.getElementById('qualityIndicator').style.display = 'none';
         }
 
         function updateQuality() {
@@ -541,7 +601,6 @@
             const fill = document.getElementById('qualityFill');
             fill.style.width = quality + '%';
             
-            // Wenn Qualität über 80% ist, wird der Balken rot, sonst schwarz
             if (quality > 80) {
                 fill.classList.add('high-quality');
             } else {
@@ -555,13 +614,14 @@
             const output = document.getElementById('output').textContent;
             navigator.clipboard.writeText(output).then(() => {
                 const btn = document.getElementById('copyBtn');
-                const originalText = btn.textContent;
-                btn.textContent = 'Kopiert!';
-                btn.style.background = '#E63946'; // Feedback in Rot
+                const originalText = btn.innerHTML;
+                
+                btn.innerHTML = '<span>Kopiert!</span>';
+                btn.classList.add('success');
                 
                 setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.style.background = '';
+                    btn.innerHTML = '<span>Prompt Kopieren</span>';
+                    btn.classList.remove('success');
                 }, 2000);
             });
         }
@@ -589,7 +649,6 @@
                 document.getElementById('format').value = 'Fließtext + nummerierte Liste';
                 document.getElementById('tonalitaet').value = 'wissenschaftlich';
             }
-            // Trigger quality update visual
             updateQuality();
         }
 
